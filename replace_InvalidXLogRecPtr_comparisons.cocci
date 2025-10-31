@@ -83,3 +83,22 @@ expression E1;
 - InvalidXLogRecPtr != *E1
 + XLogRecPtrIsValid(*E1)
 )
+
+// Replace explicit function call patterns
+@@
+identifier func;
+expression list args;
+@@
+(
+- func(args) == InvalidXLogRecPtr
++ !XLogRecPtrIsValid(func(args))
+|
+- InvalidXLogRecPtr == func(args)
++ !XLogRecPtrIsValid(func(args))
+|
+- func(args) != InvalidXLogRecPtr
++ XLogRecPtrIsValid(func(args))
+|
+- InvalidXLogRecPtr != func(args)
++ XLogRecPtrIsValid(func(args))
+)
