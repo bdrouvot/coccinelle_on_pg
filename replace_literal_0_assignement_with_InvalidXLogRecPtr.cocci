@@ -6,8 +6,13 @@
 // Generate a patch file:
 // spatch --sp-file replace_literal_0_assignement_with_InvalidXLogRecPtr.cocci \
 //       --dir /path/to/postgres/src \
-//       --include-headers \
+//       -I /path/to/postgres/src/include \
+//       --recursive-includes \
 //       > replace.patch
+//
+// Note that --recursive-includes is needed to collect from all the structs
+// Then it's strongly recommended to use wrappers/run_parallel.sh (read it's
+// header as to why)
 
 // Collect all XLogRecPtr fields from structs
 @collect1@
