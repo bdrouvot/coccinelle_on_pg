@@ -7,6 +7,7 @@
 # does not include header files recursively (confirmed by using --verbose-includes)
 
 set -euo pipefail
+ulimit -s unlimited
 
 usage() {
     cat << EOF
@@ -109,7 +110,7 @@ rm -f "$OUTPUT_FILE"
 echo "Processing files with $JOBS parallel jobs..."
 
 # Process files in parallel
-find src -name "*.c" -type f | \
+find . -name "*.c" -type f | \
     parallel -j"$JOBS" --bar \
         spatch --sp-file "$COCCI_SCRIPT" {} \
             -I "$PGSRC/src/include" \
