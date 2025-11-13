@@ -20,12 +20,14 @@ Options:
     -s, --source    PostgreSQL source directory (default: /home/postgres/postgresql/postgres)
     -j, --jobs      Number of parallel jobs (default: 8)
     -o, --output    Output file name (default: based on cocci script name)
+    -g, --grep      Only process files containing this pattern (optional)
     -h, --help      Show this help message
 
 Examples:
     $(basename "$0") replace_literal_0.cocci
     $(basename "$0") my_script.cocci -j 16 -o custom_output.patch
     $(basename "$0") /path/to/script.cocci -s /path/to/postgres
+    $(basename "$0") replace.cocci -g "InvalidXLogRecPtr"
 EOF
     exit 1
 }
@@ -40,6 +42,7 @@ COCCI_SCRIPT=""
 PGSRC=${PGSRC:-/home/postgres/postgresql/postgres}
 JOBS=${JOBS:-8}
 OUTPUT_FILE=""
+GREP_PATTERN=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -53,6 +56,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -o|--output)
             OUTPUT_FILE="$2"
+            shift 2
+            ;;
+        -g|--grep)
+            GREP_PATTERN="$2"
             shift 2
             ;;
         -h|--help)
@@ -101,6 +108,9 @@ fi
 echo "Coccinelle script: $COCCI_SCRIPT"
 echo "PostgreSQL source: $PGSRC"
 echo "Parallel jobs: $JOBS"
+if [[ -n "$GREP_PATTERN" ]]; then
+    echo "Grep filter: $GREP_PATTERN"
+fi
 echo "Output file: $OUTPUT_FILE"
 echo ""
 
@@ -110,13 +120,25 @@ rm -f "$OUTPUT_FILE"
 echo "Processing files with $JOBS parallel jobs..."
 
 # Process files in parallel
-find . -name "*.c" -type f | \
-    parallel -j"$JOBS" --bar \
-        spatch --sp-file "$COCCI_SCRIPT" {} \
-            -I "$PGSRC/src/include" \
-            --recursive-includes \
-            --disable-worth-trying-opt \
-        >> "$OUTPUT_FILE"
+if [[ -n "$GREP_PATTERN" ]]; then
+    # Only process files containing the grep pattern
+    find . -name "*.c" -type f -exec grep -l "$GREP_PATTERN" {} \; | \
+        parallel -j"$JOBS" --bar \
+            spatch --sp-file "$COCCI_SCRIPT" {} \
+                -I "$PGSRC/src/include" \
+                --recursive-includes \
+                --disable-worth-trying-opt \
+            >> "$OUTPUT_FILE"
+else
+    # Process all .c files
+    find . -name "*.c" -type f | \
+        parallel -j"$JOBS" --bar \
+            spatch --sp-file "$COCCI_SCRIPT" {} \
+                -I "$PGSRC/src/include" \
+                --recursive-includes \
+                --disable-worth-trying-opt \
+            >> "$OUTPUT_FILE"
+fi
 
 echo ""
 echo "Processing complete. Results in $OUTPUT_FILE"
