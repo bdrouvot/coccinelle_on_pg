@@ -102,9 +102,98 @@ expression E;
 + E->fld = InvalidXLogRecPtr
 )
 
-// Replace simple identifiers with type checking
+// Replace E.field = 0 (direct member access with .)
+@transform7 depends on collect1@
+identifier collect1.sname, collect1.fld;
+struct sname E;
 @@
-XLogRecPtr L;
+(
+- E.fld = 0
++ E.fld = InvalidXLogRecPtr
+)
+
+@transform8 depends on collect2@
+identifier collect2.fld;
+type collect2.T;
+T E;
+@@
+(
+- E.fld = 0
++ E.fld = InvalidXLogRecPtr
+)
+
+@transform9 depends on collect3@
+identifier collect3.fld;
+type collect3.T;
+T E;
+@@
+(
+- E.fld = 0
++ E.fld = InvalidXLogRecPtr
+)
+
+// Handle direct member access where E is an expression
+@transform10 depends on collect1@
+identifier collect1.fld;
+expression E;
+@@
+(
+- E.fld = 0
++ E.fld = InvalidXLogRecPtr
+)
+
+@transform11 depends on collect2@
+identifier collect2.fld;
+expression E;
+@@
+(
+- E.fld = 0
++ E.fld = InvalidXLogRecPtr
+)
+
+@transform12 depends on collect3@
+identifier collect3.fld;
+expression E;
+@@
+(
+- E.fld = 0
++ E.fld = InvalidXLogRecPtr
+)
+
+
+// Replace simple identifiers with type checking
+@ exists @
+identifier L;
+@@
+  XLogRecPtr L;
+  ... when any
+(
+- L = 0
++ L = InvalidXLogRecPtr
+)
+
+@ exists @
+identifier L;
+@@
+  XLogRecPtr *L;
+  ... when any
+(
+- *L = 0
++ *L = InvalidXLogRecPtr
+)
+
+// Replace initialization at declaration
+@@
+identifier L;
+@@
+(
+- XLogRecPtr L = 0;
++ XLogRecPtr L = InvalidXLogRecPtr;
+)
+
+// Replace assignment to global XLogRecPtr variables
+@@
+global idexpression XLogRecPtr L;
 @@
 (
 - L = 0
