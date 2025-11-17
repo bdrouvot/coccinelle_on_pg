@@ -155,3 +155,32 @@ global idexpression T L;
 - L = 0
 + L = InvalidXLogRecPtr
 )
+
+// Handle functions
+@@
+identifier func;
+identifier arg;
+type T = {XLogRecPtr, GistNSN};
+@@
+func(..., T arg, ...) {
+<...
+(
+- arg = 0
++ arg = InvalidXLogRecPtr
+)
+...>
+}
+
+@@
+identifier func;
+identifier arg;
+type T = {XLogRecPtr, GistNSN};
+@@
+func(..., T *arg, ...) {
+<...
+(
+- *arg = 0
++ *arg = InvalidXLogRecPtr
+)
+...>
+}
