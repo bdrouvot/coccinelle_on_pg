@@ -17,30 +17,39 @@
 // Collect all XLogRecPtr fields from structs
 @collect1@
 identifier sname, fld;
+typedef XLogRecPtr;
+typedef GistNSN;
+type T = {XLogRecPtr, GistNSN};
 @@
   struct sname {
     ...
-    XLogRecPtr fld;
+    T fld;
     ...
   };
 
 @collect2@
 identifier fld;
 type T;
+typedef XLogRecPtr;
+typedef GistNSN;
+type T1 = {XLogRecPtr, GistNSN};
 @@
   typedef struct {
     ...
-    XLogRecPtr fld;
+    T1 fld;
     ...
   } T;
 
 @collect3@
 identifier sname, fld;
 type T;
+typedef XLogRecPtr;
+typedef GistNSN;
+type T1 = {XLogRecPtr, GistNSN};
 @@
   typedef struct sname {
     ...
-    XLogRecPtr fld;
+    T1 fld;
     ...
   } T;
 
@@ -74,36 +83,8 @@ T *E;
 + E->fld = InvalidXLogRecPtr
 )
 
-// Handle cases where E is an expression (like MyProc which is extern PGPROC *MyProc)
-@transform4 depends on collect1@
-identifier collect1.fld;
-expression E;
-@@
-(
-- E->fld = 0
-+ E->fld = InvalidXLogRecPtr
-)
-
-@transform5 depends on collect2@
-identifier collect2.fld;
-expression E;
-@@
-(
-- E->fld = 0
-+ E->fld = InvalidXLogRecPtr
-)
-
-@transform6 depends on collect3@
-identifier collect3.fld;
-expression E;
-@@
-(
-- E->fld = 0
-+ E->fld = InvalidXLogRecPtr
-)
-
 // Replace E.field = 0 (direct member access with .)
-@transform7 depends on collect1@
+@transform4 depends on collect1@
 identifier collect1.sname, collect1.fld;
 struct sname E;
 @@
@@ -112,7 +93,7 @@ struct sname E;
 + E.fld = InvalidXLogRecPtr
 )
 
-@transform8 depends on collect2@
+@transform5 depends on collect2@
 identifier collect2.fld;
 type collect2.T;
 T E;
@@ -122,7 +103,7 @@ T E;
 + E.fld = InvalidXLogRecPtr
 )
 
-@transform9 depends on collect3@
+@transform6 depends on collect3@
 identifier collect3.fld;
 type collect3.T;
 T E;
@@ -132,40 +113,12 @@ T E;
 + E.fld = InvalidXLogRecPtr
 )
 
-// Handle direct member access where E is an expression
-@transform10 depends on collect1@
-identifier collect1.fld;
-expression E;
-@@
-(
-- E.fld = 0
-+ E.fld = InvalidXLogRecPtr
-)
-
-@transform11 depends on collect2@
-identifier collect2.fld;
-expression E;
-@@
-(
-- E.fld = 0
-+ E.fld = InvalidXLogRecPtr
-)
-
-@transform12 depends on collect3@
-identifier collect3.fld;
-expression E;
-@@
-(
-- E.fld = 0
-+ E.fld = InvalidXLogRecPtr
-)
-
-
 // Replace simple identifiers with type checking
 @ exists @
 identifier L;
+type T = {XLogRecPtr, GistNSN};
 @@
-  XLogRecPtr L;
+  T L;
   ... when any
 (
 - L = 0
@@ -174,8 +127,9 @@ identifier L;
 
 @ exists @
 identifier L;
+type T = {XLogRecPtr, GistNSN};
 @@
-  XLogRecPtr *L;
+  T *L;
   ... when any
 (
 - *L = 0
@@ -185,15 +139,17 @@ identifier L;
 // Replace initialization at declaration
 @@
 identifier L;
+type T = {XLogRecPtr, GistNSN};
 @@
 (
-- XLogRecPtr L = 0;
-+ XLogRecPtr L = InvalidXLogRecPtr;
+- T L = 0;
++ T L = InvalidXLogRecPtr;
 )
 
 // Replace assignment to global XLogRecPtr variables
 @@
-global idexpression XLogRecPtr L;
+type T = {XLogRecPtr, GistNSN};
+global idexpression T L;
 @@
 (
 - L = 0
