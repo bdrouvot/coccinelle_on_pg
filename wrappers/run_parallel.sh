@@ -11,7 +11,7 @@ ulimit -s unlimited
 
 usage() {
     cat << EOF
-Usage: $(basename "$0") <cocci_script> [options]
+Usage: $(basename "$0") <cocci_script> [options] [-- spatch_options]
 
 Arguments:
     cocci_script    Path to the Coccinelle script (.cocci file)
@@ -22,12 +22,15 @@ Options:
     -o, --output    Output file name (default: based on cocci script name)
     -g, --grep      Only process files containing this pattern (optional)
     -h, --help      Show this help message
+    --              Everything after this is passed directly to spatch
 
 Examples:
     $(basename "$0") replace_literal_0.cocci
     $(basename "$0") my_script.cocci -j 16 -o custom_output.patch
     $(basename "$0") /path/to/script.cocci -s /path/to/postgres
     $(basename "$0") replace.cocci -g "InvalidXLogRecPtr"
+    $(basename "$0") my_script.cocci -- --macro-file macro_file.txt
+    $(basename "$0") my_script.cocci -j 16 -- --macro-file macros.txt --verbose-includes
 EOF
     exit 1
 }
@@ -43,6 +46,7 @@ PGSRC=${PGSRC:-/home/postgres/postgresql/postgres}
 JOBS=${JOBS:-8}
 OUTPUT_FILE=""
 GREP_PATTERN=""
+SPATCH_EXTRA_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -64,6 +68,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             usage
+            ;;
+        --)
+            shift
+            # Everything after -- goes to spatch
+            SPATCH_EXTRA_ARGS=("$@")
+            break
             ;;
         -*)
             echo "Unknown option: $1" >&2
@@ -111,6 +121,9 @@ echo "Parallel jobs: $JOBS"
 if [[ -n "$GREP_PATTERN" ]]; then
     echo "Grep filter: $GREP_PATTERN"
 fi
+if [[ ${#SPATCH_EXTRA_ARGS[@]} -gt 0 ]]; then
+    echo "Extra spatch args: ${SPATCH_EXTRA_ARGS[*]}"
+fi
 echo "Output file: $OUTPUT_FILE"
 echo ""
 
@@ -128,6 +141,7 @@ if [[ -n "$GREP_PATTERN" ]]; then
                 -I "$PGSRC/src/include" \
                 --recursive-includes \
                 --disable-worth-trying-opt \
+                "${SPATCH_EXTRA_ARGS[@]}" \
             >> "$OUTPUT_FILE"
 else
     # Process all .c files
@@ -137,6 +151,7 @@ else
                 -I "$PGSRC/src/include" \
                 --recursive-includes \
                 --disable-worth-trying-opt \
+                "${SPATCH_EXTRA_ARGS[@]}" \
             >> "$OUTPUT_FILE"
 fi
 
