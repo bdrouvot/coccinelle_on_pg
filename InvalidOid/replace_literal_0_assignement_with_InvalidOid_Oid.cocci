@@ -182,3 +182,18 @@ func(..., T *arg, ...) {
 )
 ...>
 }
+
+@ exists @
+identifier func;
+identifier arg;
+type T = {Oid, RegProcedure};
+expression idx;
+@@
+func(..., T *arg, ...) {
+<... when any
+(
+- arg[idx] = 0
++ arg[idx] = InvalidOid
+)
+...>
+}

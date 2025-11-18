@@ -184,3 +184,18 @@ func(..., T *arg, ...) {
 )
 ...>
 }
+
+@ exists @
+identifier func;
+identifier arg;
+type T = {XLogRecPtr, GistNSN};
+expression idx;
+@@
+func(..., T *arg, ...) {
+<... when any
+(
+- arg[idx] = 0
++ arg[idx] = InvalidXLogRecPtr
+)
+...>
+}
