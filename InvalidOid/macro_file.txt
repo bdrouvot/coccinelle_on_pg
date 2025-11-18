@@ -1,0 +1,28 @@
+// Macro definitions for Coccinelle preprocessing
+// Minimal definitions to parse PostgreSQL catalog headers
+
+// CATALOG macro
+#define CATALOG(name,oid,oidmacro) typedef struct FormData_##name
+
+#define BKI_BOOTSTRAP
+#define BKI_ROWTYPE_OID(oid,oidmacro)
+#define BKI_SCHEMA_MACRO
+#define BKI_SHARED_RELATION
+#define BKI_WITHOUT_OIDS
+#define BKI_LOOKUP(x)
+#define BKI_LOOKUP_OPT(x)
+#define BKI_DEFAULT(x)
+#define BKI_FORCE_NULL
+#define BKI_FORCE_NOT_NULL
+#define BKI_ARRAY_DEFAULT(x)
+#define DECLARE_TOAST(name, toastoid, indexoid)
+#define DECLARE_TOAST_WITH_MACRO(name,toastoid,indexoid,toastoidmacro,indexoidmacro)
+#define DECLARE_INDEX(name,oid,oidmacro,tblname,decl)
+#define DECLARE_UNIQUE_INDEX(name,oid,oidmacro,tblname,decl)
+#define DECLARE_UNIQUE_INDEX_PKEY(name,oid,oidmacro,tblname,decl)
+#define DECLARE_OID_DEFINING_MACRO(name,oid)
+#define DECLARE_FOREIGN_KEY(cols,reftbl,refcols)
+#define DECLARE_FOREIGN_KEY_OPT(cols,reftbl,refcols)
+#define DECLARE_ARRAY_FOREIGN_KEY(cols,reftbl,refcols)
+#define DECLARE_ARRAY_FOREIGN_KEY_OPT(cols,reftbl,refcols)
+#define MAKE_SYSCACHE(name,idxname,nbuckets)
