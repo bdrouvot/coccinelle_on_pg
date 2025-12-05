@@ -15,7 +15,7 @@
 // Note: C23 made func() and func(void) equivalent.
 
 // C99: https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf (§6.11.6 and §6.5.2.2/6)
-// C23: https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf (§6.7.6.3)
+// C23: https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf (§6.7.7.4/13)
 
 @@
 type RT;
