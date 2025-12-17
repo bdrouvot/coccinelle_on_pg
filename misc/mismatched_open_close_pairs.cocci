@@ -17,18 +17,18 @@
 
 @@
 identifier i;
-expression e1, e2;
+expression e;
 @@
 i = index_open(...);
 ...
-- relation_close(i, e2);
-+ index_close(i, e2);
+- relation_close(i, e);
++ index_close(i, e);
 
 @@
 identifier i;
-expression e1, e2;
+expression e;
 @@
 i = relation_open(...);
 ...
-- index_close(i, e2);
-+ relation_close(i, e2);
+- index_close(i, e);
++ relation_close(i, e);
