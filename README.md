@@ -22,3 +22,4 @@ Overview of related PostgreSQL commits:
 | [search_const_away.cocci](https://github.com/bdrouvot/coccinelle_on_pg/blob/main/misc/search_const_away.cocci)| [Separate read and write pointers in pg_saslprep](https://postgr.es/c/de746e0d2a5)|
 | [search_const_away.cocci](https://github.com/bdrouvot/coccinelle_on_pg/blob/main/misc/search_const_away.cocci)| [Add const to read only TableInfo pointers in pg_dump](https://postgr.es/c/707f905399b)|
 | [search_const_away.cocci](https://github.com/bdrouvot/coccinelle_on_pg/blob/main/misc/search_const_away.cocci)| [Avoid casting void * function arguments](https://postgr.es/c/c3c240537f6)|
+| [search_const_away.cocci](https://github.com/bdrouvot/coccinelle_on_pg/blob/main/misc/search_const_away.cocci)| Part of [Fix accidentally cast away qualifiers](https://postgr.es/c/5ca5f12c2c6)|
